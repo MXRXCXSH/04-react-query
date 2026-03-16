@@ -1,4 +1,5 @@
 import css from './App.module.css';
+// import { useEffect } from 'react';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import Pagination from '../Pagination/Pagination';
@@ -7,6 +8,7 @@ import MovieGrid from '../MovieGrid/MovieGrid';
 import MovieModal from '../MovieModal/MovieModal';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import { NoResults } from '../ErrorMessage/ErrorMessage';
 import { Toaster } from 'react-hot-toast';
 import FetchMovies from '../../services/movieService';
 import type { Movie } from '../../types/movie';
@@ -16,7 +18,7 @@ function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isSuccess } = useQuery({
     queryKey: ['movies', query, page],
     queryFn: () => FetchMovies({ query, page }),
     enabled: query !== '',
@@ -43,7 +45,8 @@ function App() {
       <SearchBar onSubmit={handleSearch} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {data && data.results.length > 0 && (
+      {isSuccess && data && data.results.length === 0 && <NoResults />}
+      {isSuccess && data && data.results.length > 0 && (
         <>
           <MovieGrid movies={data.results} onSelect={handleSelect} />
           <Pagination
